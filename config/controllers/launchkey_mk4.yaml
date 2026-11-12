@@ -29,12 +29,12 @@ encoders:
   channel: 16
   ccs: [21, 22, 23, 24, 25, 26, 27, 28]
 
-# Transport buttons are reported as CCs on channel 16
+# Transport buttons are reported as CCs on channel 1 (DAW port raw bytes B0 ...)
 transport:
-  channel: 16
-  play: 117
-  stop: 118
-  record: 119
+  channel: 1
+  play: 115   # 0x73
+  stop: 118   # 0x76 — no dedicated Stop button on Mini MK4; Play toggles start/stop
+  record: 117 # 0x75
 
 # LED feedback channels and colours
 led:

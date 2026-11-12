@@ -16,12 +16,16 @@ class EngineState:
         self.mutes: dict[int, bool] = {}
         self.patterns: dict[int, bool] = {}
         self.encoder_bank = "device"
+        self.playing = False
+        self.recording_armed = False
 
     def snapshot(self) -> dict:
         return {
             "active_track": self.active_track,
             "mutes": copy.copy(self.mutes),
             "patterns": copy.copy(self.patterns),
+            "playing": self.playing,
+            "recording_armed": self.recording_armed,
         }
 
 
@@ -247,18 +251,27 @@ class MidiEngine:
         transport = self.config.get("transport", {})
         global_channel = self.config.get("global_channel", 16) - 1
 
-        if event.action == "play" and transport.get("start") == "realtime_start":
-            self._to_synth(mido.Message("start"))
+        if event.action == "play":
+            if self.state.playing:
+                if transport.get("stop") == "realtime_stop":
+                    self._to_synth(mido.Message("stop"))
+                self.state.playing = False
+            else:
+                if transport.get("start") == "realtime_start":
+                    self._to_synth(mido.Message("start"))
+                self.state.playing = True
         elif event.action == "stop" and transport.get("stop") == "realtime_stop":
             self._to_synth(mido.Message("stop"))
+            self.state.playing = False
         elif event.action == "record":
+            self.state.recording_armed = not self.state.recording_armed
             cc = transport.get("record_arm_cc", 64)
             self._to_synth(
                 mido.Message(
                     "control_change",
                     channel=global_channel,
                     control=cc,
-                    value=127,
+                    value=127 if self.state.recording_armed else 0,
                 )
             )
 
