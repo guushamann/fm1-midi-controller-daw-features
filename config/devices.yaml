@@ -12,5 +12,5 @@ controller:
 synth:
   profile: fm1_melodee
   port_patterns:
-    midi_in: "FM-1:FM-1 MIDI .+|M-VAVE FM-1:FM-1 MIDI .+|Melodee:Melodee MIDI .+"
-    midi_out: "FM-1:FM-1 MIDI .+|M-VAVE FM-1:FM-1 MIDI .+|Melodee:Melodee MIDI .+"
+    midi_in: "FM-1:FM-1 MIDI .+|M-VAVE FM-1.*MIDI .+|Melodee FM-1.*MIDI .+|Melodee:Melodee MIDI .+"
+    midi_out: "FM-1:FM-1 MIDI .+|M-VAVE FM-1.*MIDI .+|Melodee FM-1.*MIDI .+|Melodee:Melodee MIDI .+"
