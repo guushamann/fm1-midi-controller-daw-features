@@ -71,7 +71,7 @@ class LaunchkeyMK3Driver(BaseControllerDriver):
                             value=msg.value,
                         )
 
-            if msg.channel == transport_ch:
+            if msg.channel == transport_ch and msg.value > 0:
                 transport_map = {
                     self.transport["play"]: "play",
                     self.transport["stop"]: "stop",
