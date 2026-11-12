@@ -61,6 +61,19 @@ class MidiEngine:
             except Exception:
                 pass
 
+    def _to_synth_sysex(self, data: list[int]) -> None:
+        sysex_config = self.config.get("sysex")
+        if sysex_config is None:
+            return
+        manufacturer = sysex_config.get("manufacturer", [0x7D, 0x46, 0x4C])
+        msg = mido.Message("sysex", data=manufacturer + data)
+        self._to_synth(msg)
+
+    @staticmethod
+    def _v14(value: int) -> list[int]:
+        value = max(0, min(16383, value))
+        return [value & 0x7F, (value >> 7) & 0x7F]
+
     def _update_feedback(self) -> None:
         self.driver.update_feedback(self._daw_out_port, self.state.snapshot())
 
@@ -107,40 +120,67 @@ class MidiEngine:
             return
 
         tracks = self.config.get("tracks", [])
+        sysex = self.config.get("sysex")
         global_channel = self.config.get("global_channel", 16) - 1
 
         if 0 <= event.pad_index < 8:
             track_id = event.pad_index + 1
             current = self.state.mutes.get(track_id, False)
             self.state.mutes[track_id] = not current
-            track = next((t for t in tracks if t["id"] == track_id), None)
-            if track:
-                self._to_synth(
-                    mido.Message(
-                        "control_change",
-                        channel=track["channel"] - 1,
-                        control=track["mute_cc"],
-                        value=127 if self.state.mutes[track_id] else 0,
-                    )
+            muted = self.state.mutes[track_id]
+
+            if sysex:
+                mute_param = sysex.get("params", {}).get("mute", 40)
+                self._to_synth_sysex(
+                    [sysex.get("track_param_cmd", 31), track_id - 1, mute_param]
+                    + self._v14(1 if muted else 0)
                 )
+            else:
+                track = next((t for t in tracks if t["id"] == track_id), None)
+                if track:
+                    self._to_synth(
+                        mido.Message(
+                            "control_change",
+                            channel=track["channel"] - 1,
+                            control=track["mute_cc"],
+                            value=127 if muted else 0,
+                        )
+                    )
 
         elif 8 <= event.pad_index < 12:
             track_id = event.pad_index - 8 + 1
             if track_id <= len(tracks):
                 self.state.active_track = track_id
+                if sysex:
+                    self._to_synth_sysex(
+                        [sysex.get("track_select_cmd", 27), track_id - 1]
+                    )
 
         elif 12 <= event.pad_index < 16:
             pattern_id = event.pad_index - 12 + 1
             for pid in self.state.patterns:
                 self.state.patterns[pid] = False
             self.state.patterns[pattern_id] = True
-            self._to_synth(
-                mido.Message(
-                    "program_change",
-                    channel=global_channel,
-                    program=pattern_id - 1,
+
+            if sysex:
+                active_track = self.state.active_track - 1
+                if 0 <= active_track < 4:
+                    self._to_synth_sysex(
+                        [
+                            sysex.get("pattern_cmd", 73),
+                            active_track,
+                            sysex.get("pattern_op", 1),
+                            pattern_id - 1,
+                        ]
+                    )
+            else:
+                self._to_synth(
+                    mido.Message(
+                        "program_change",
+                        channel=global_channel,
+                        program=pattern_id - 1,
+                    )
                 )
-            )
 
     def _handle_encoder(self, event: EncoderEvent) -> None:
         tracks = self.config.get("tracks", [])

@@ -77,6 +77,17 @@ fx:
     - name: "Master Delay"
       cc: 93
 
+# Melodee editor-protocol SysEx output for pad actions.
+# The editor protocol header is F0 7D 46 4C (non-commercial "FL").
+sysex:
+  manufacturer: [0x7D, 0x46, 0x4C]
+  track_select_cmd: 27     # TRACK
+  track_param_cmd: 31      # TRACK_PARAM
+  pattern_cmd: 73          # PATTERN
+  pattern_op: 1            # select bank
+  params:
+    mute: 40               # P_MUTE
+
 # Transport / recording targets
 transport:
   start: "realtime_start"
