@@ -16,6 +16,7 @@ class LaunchkeyMK3Driver(BaseControllerDriver):
         super().__init__(config)
         self.handshake = config["handshake"]
         self.encoder_bank_cc = config.get("encoder_bank_cc")
+        self.encoder_bank_channel = config.get("encoder_bank_channel", 16)
         self.encoder_banks = config.get("encoder_banks", {})
         self.pads = config["pads"]
         self.encoders = config["encoders"]
@@ -46,10 +47,14 @@ class LaunchkeyMK3Driver(BaseControllerDriver):
             TransportEvent,
         )
 
+        encoder_ch = self.encoders["channel"] - 1
+        transport_ch = self.transport["channel"] - 1
+        bank_ch = self.encoder_bank_channel - 1
+
         if msg.is_cc():
             if (
                 self.encoder_bank_cc is not None
-                and msg.channel == 15
+                and msg.channel == bank_ch
                 and msg.control == self.encoder_bank_cc
                 and msg.value in self.encoder_banks
             ):
@@ -57,7 +62,7 @@ class LaunchkeyMK3Driver(BaseControllerDriver):
                 self.current_bank = bank
                 return EncoderBankChange(bank=bank)
 
-            if msg.channel == 15:
+            if msg.channel == encoder_ch:
                 for idx, cc in enumerate(self.encoders["ccs"]):
                     if msg.control == cc:
                         return EncoderEvent(
@@ -66,6 +71,7 @@ class LaunchkeyMK3Driver(BaseControllerDriver):
                             value=msg.value,
                         )
 
+            if msg.channel == transport_ch:
                 transport_map = {
                     self.transport["play"]: "play",
                     self.transport["stop"]: "stop",

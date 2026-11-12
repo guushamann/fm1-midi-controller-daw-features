@@ -2,7 +2,7 @@
 # Patterns are matched against ALSA port names returned by mido.
 
 controller:
-  profile: launchkey_mk3
+  profile: launchkey_mk4
   port_patterns:
     midi_in: "Launchkey Mini.*MIDI .+"
     midi_out: "Launchkey Mini.*MIDI .+"
