@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import copy
+import threading
+import time
 from typing import TYPE_CHECKING
 
 import mido
@@ -42,6 +44,9 @@ class MidiEngine:
         self.state = EngineState()
         self._output_port: mido.Output | None = None
         self._daw_out_port: mido.Output | None = None
+        self._clock_thread: threading.Thread | None = None
+        self._clock_running = threading.Event()
+        self._clock_bpm = self.config.get("transport", {}).get("clock_bpm", 120)
 
     def set_ports(
         self,
@@ -57,7 +62,7 @@ class MidiEngine:
                 self._output_port.send(msg)
             except Exception:
                 pass
-        if self.monitor_queue is not None:
+        if self.monitor_queue is not None and msg.type != "clock":
             try:
                 self.monitor_queue.put_nowait(
                     {"direction": "OUT", "port": "FM-1", "bytes": msg.bytes()}
@@ -78,6 +83,31 @@ class MidiEngine:
         # Melodee editor protocol: 14-bit values are offset by 8192.
         u = max(0, min(16383, value + 8192))
         return [u & 0x7F, (u >> 7) & 0x7F]
+
+    def _start_clock(self) -> None:
+        if self._clock_thread is not None and self._clock_thread.is_alive():
+            return
+        self._clock_running.set()
+        self._clock_thread = threading.Thread(target=self._clock_loop, daemon=True)
+        self._clock_thread.start()
+
+    def _stop_clock(self) -> None:
+        self._clock_running.clear()
+        if self._clock_thread is not None:
+            self._clock_thread.join(timeout=0.1)
+            self._clock_thread = None
+
+    def _clock_loop(self) -> None:
+        if self._clock_bpm <= 0:
+            return
+        interval = 60.0 / (self._clock_bpm * 24)
+        next_time = time.perf_counter()
+        while self._clock_running.is_set():
+            self._to_synth(mido.Message("clock"))
+            next_time += interval
+            sleep_time = next_time - time.perf_counter()
+            if sleep_time > 0:
+                time.sleep(sleep_time)
 
     def _update_feedback(self) -> None:
         self.driver.update_feedback(self._daw_out_port, self.state.snapshot())
@@ -253,14 +283,17 @@ class MidiEngine:
 
         if event.action == "play":
             if self.state.playing:
+                self._stop_clock()
                 if transport.get("stop") == "realtime_stop":
                     self._to_synth(mido.Message("stop"))
                 self.state.playing = False
             else:
                 if transport.get("start") == "realtime_start":
                     self._to_synth(mido.Message("start"))
+                self._start_clock()
                 self.state.playing = True
         elif event.action == "stop" and transport.get("stop") == "realtime_stop":
+            self._stop_clock()
             self._to_synth(mido.Message("stop"))
             self.state.playing = False
         elif event.action == "record":

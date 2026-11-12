@@ -93,3 +93,4 @@ transport:
   start: "realtime_start"
   stop: "realtime_stop"
   record_arm_cc: 64
+  clock_bpm: 120  # MIDI clock BPM when playing (FM-1 CLK must be set to USB)

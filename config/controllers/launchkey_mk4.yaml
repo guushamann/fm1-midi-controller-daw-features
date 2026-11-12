@@ -41,7 +41,7 @@ led:
   static_channel: 1
   pulse_channel: 3
   colors:
-    off: 0
+    "off": 0
     dim_red: 1
     bright_red: 3
     dim_orange: 17

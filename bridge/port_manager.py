@@ -99,10 +99,16 @@ class PortManager:
     def _on_message(self, port_type: str, msg: mido.Message) -> None:
         if self.monitor_queue is not None:
             try:
+                if "daw" in port_type:
+                    port_label = "LK DAW"
+                elif "synth" in port_type:
+                    port_label = "FM-1"
+                else:
+                    port_label = "LK MIDI"
                 self.monitor_queue.put_nowait(
                     {
                         "direction": "IN",
-                        "port": "LK DAW" if "daw" in port_type else "LK MIDI",
+                        "port": port_label,
                         "bytes": msg.bytes(),
                     }
                 )
