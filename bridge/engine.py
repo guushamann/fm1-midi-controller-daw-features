@@ -70,9 +70,10 @@ class MidiEngine:
         self._to_synth(msg)
 
     @staticmethod
-    def _v14(value: int) -> list[int]:
-        value = max(0, min(16383, value))
-        return [value & 0x7F, (value >> 7) & 0x7F]
+    def _ed_v(value: int) -> list[int]:
+        # Melodee editor protocol: 14-bit values are offset by 8192.
+        u = max(0, min(16383, value + 8192))
+        return [u & 0x7F, (u >> 7) & 0x7F]
 
     def _update_feedback(self) -> None:
         self.driver.update_feedback(self._daw_out_port, self.state.snapshot())
@@ -133,7 +134,7 @@ class MidiEngine:
                 mute_param = sysex.get("params", {}).get("mute", 40)
                 self._to_synth_sysex(
                     [sysex.get("track_param_cmd", 31), track_id - 1, mute_param]
-                    + self._v14(1 if muted else 0)
+                    + self._ed_v(1 if muted else 0)
                 )
             else:
                 track = next((t for t in tracks if t["id"] == track_id), None)
