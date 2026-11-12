@@ -1,0 +1,59 @@
+# Novation Launchkey Mini MK3 DAW-mode layout.
+
+name: "Novation Launchkey Mini MK3"
+driver: "bridge.drivers.novation_lk:LaunchkeyMK3Driver"
+
+# DAW handshake bytes (channel 16 note 12)
+handshake:
+  connect: [0x9F, 0x0C, 0x7F]
+  disconnect: [0x9F, 0x0C, 0x00]
+
+# Encoder bank switching is reported on channel 16 CC 9
+encoder_bank_cc: 9
+encoder_banks:
+  0: device
+  1: mixer
+  2: sends
+
+# Pad grid (16 pads in two rows of 8)
+# Top row: pads 0-7  (notes 0x60..0x67 on DAW channel)
+# Bottom row: pads 8-15 (notes 0x70..0x77 on DAW channel)
+pads:
+  base_note_top: 0x60
+  base_note_bottom: 0x70
+  channel: 16
+
+# CCs for the 8 encoders in Device/Plugin mode (channel 16)
+encoders:
+  channel: 16
+  ccs: [21, 22, 23, 24, 25, 26, 27, 28]
+
+# Transport buttons are reported as CCs on channel 16
+transport:
+  channel: 16
+  play: 115
+  stop: 116
+  record: 117
+
+# LED feedback channels and colors
+led:
+  static_channel: 1
+  pulse_channel: 3
+  colors:
+    off: 0
+    dim_red: 1
+    bright_red: 3
+    dim_orange: 17
+    bright_orange: 19
+    amber: 35
+    dim_yellow: 45
+    bright_yellow: 47
+    dim_green: 16
+    bright_green: 18
+    dim_cyan: 32
+    bright_cyan: 34
+    dim_blue: 48
+    bright_blue: 50
+    dim_purple: 64
+    bright_purple: 66
+    white: 127

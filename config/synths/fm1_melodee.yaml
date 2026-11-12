@@ -1,0 +1,84 @@
+# M-VAVE FM-1 running Melodee firmware mapping targets.
+
+name: "M-VAVE FM-1 (Melodee)"
+
+# Global control channel for pattern changes / transport
+global_channel: 16
+
+# Internal synth tracks (Prophet, CZ-1, SID, FM6)
+tracks:
+  - id: 1
+    name: "Track 1"
+    channel: 1
+    mute_cc: 60
+    volume_cc: 7
+  - id: 2
+    name: "Track 2"
+    channel: 2
+    mute_cc: 61
+    volume_cc: 7
+  - id: 3
+    name: "Track 3"
+    channel: 3
+    mute_cc: 62
+    volume_cc: 7
+  - id: 4
+    name: "Track 4"
+    channel: 4
+    mute_cc: 63
+    volume_cc: 7
+
+# External MIDI tracks (5-8)
+external_tracks:
+  - id: 5
+    name: "Ext 5"
+    channel: 5
+    volume_cc: 7
+  - id: 6
+    name: "Ext 6"
+    channel: 6
+    volume_cc: 7
+  - id: 7
+    name: "Ext 7"
+    channel: 7
+    volume_cc: 7
+  - id: 8
+    name: "Ext 8"
+    channel: 8
+    volume_cc: 7
+
+# Synth engine macro CCs used in Device/Plugin encoder mode.
+# These can be freely remapped via Melodee's MIDI Learn.
+macros:
+  - name: "Cutoff"
+    cc: 74
+  - name: "Resonance"
+    cc: 71
+  - name: "Attack"
+    cc: 73
+  - name: "Decay"
+    cc: 72
+  - name: "FM Amount"
+    cc: 20
+  - name: "Shape"
+    cc: 21
+  - name: "LFO Rate"
+    cc: 22
+  - name: "LFO Depth"
+    cc: 23
+
+# FX send CCs used in Sends encoder mode
+fx:
+  reverb_send_cc: 91
+  delay_send_cc: 93
+  master_fx_ccs:
+    - name: "Master Reverb"
+      cc: 91
+    - name: "Master Delay"
+      cc: 93
+
+# Transport / recording targets
+transport:
+  start: "realtime_start"
+  stop: "realtime_stop"
+  record_arm_cc: 64

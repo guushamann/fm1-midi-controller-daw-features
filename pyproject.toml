@@ -1,0 +1,20 @@
+[project]
+name = "fm1-midi-bridge"
+version = "0.1.0"
+description = "MIDI bridge between Novation Launchkey Mini MK3 and M-VAVE FM-1 (Melodee firmware)"
+readme = "README.md"
+authors = [
+    { name = "Guus Hamann", email = "info@gustafson.nl" },
+]
+requires-python = ">=3.11"
+dependencies = [
+    "mido>=1.3.0",
+    "python-rtmidi>=1.5.0",
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.29.0",
+    "pyyaml>=6.0.1",
+    "websockets>=12.0",
+]
+
+[project.scripts]
+fm1-midi-bridge = "main:main"

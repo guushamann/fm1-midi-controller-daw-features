@@ -1,0 +1,17 @@
+[Unit]
+Description=FM-1 MIDI Bridge
+After=sound.target network.target
+
+[Service]
+Type=simple
+User=guus
+Group=guus
+WorkingDirectory=/home/guus/fm1-midi-bridge
+Environment="PATH=/home/guus/.local/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="PYTHONUNBUFFERED=1"
+ExecStart=/home/guus/.local/bin/uv run main.py
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
