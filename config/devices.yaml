@@ -4,10 +4,10 @@
 controller:
   profile: launchkey_mk3
   port_patterns:
-    midi_in: "Launchkey Mini MK3:Launchkey Mini MK3 MIDI .+"
-    midi_out: "Launchkey Mini MK3:Launchkey Mini MK3 MIDI .+"
-    daw_in: "Launchkey Mini MK3:Launchkey Mini MK3 DAW .+"
-    daw_out: "Launchkey Mini MK3:Launchkey Mini MK3 DAW .+"
+    midi_in: "Launchkey Mini.*MIDI .+"
+    midi_out: "Launchkey Mini.*MIDI .+"
+    daw_in: "Launchkey Mini.*DAW .+"
+    daw_out: "Launchkey Mini.*DAW .+"
 
 synth:
   profile: fm1_melodee
